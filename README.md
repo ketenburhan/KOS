@@ -1,2 +1,2 @@
 # KOS
-KTN OS
+KOS(ˈkāˌäs)
