@@ -1,6 +1,6 @@
 #include <iostream>
-#include "Terminal/Terminal.h"
+#include "Console/Console.h"
 
-int main(int, char**) {
-    Terminal::Log("Hello, world!");
+int main() {
+	Console::Log("Hello, world!");
 }
