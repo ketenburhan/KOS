@@ -11,6 +11,9 @@ namespace Console {
 	void Log(const char* msg) {
 		std::cout << msg << std::endl;
 	}
+	void Log(std::string msg) {
+		std::cout << msg << std::endl;
+	}
 	void Log(int msg) {
 		std::cout << msg << std::endl;
 	}
