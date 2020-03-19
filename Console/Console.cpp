@@ -2,19 +2,12 @@
 #include "Console.h"
 
 namespace Console {
-	void Write(const char* msg) {
+	template <typename T>
+	void Write(T msg) {
 		std::cout << msg;
 	}
-	void Write(int msg) {
-		std::cout << msg;
-	}
-	void Log(const char* msg) {
-		std::cout << msg << std::endl;
-	}
-	void Log(std::string msg) {
-		std::cout << msg << std::endl;
-	}
-	void Log(int msg) {
+	template <typename T>
+	void Log(T msg) {
 		std::cout << msg << std::endl;
 	}
 	std::string Get() {
