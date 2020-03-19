@@ -6,9 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
 add_library(Console
-            Console/Console.h
+            Console/Console.hpp
             Console/Console.cpp)
+add_library(FileSys
+            FileSys/FileSys.hpp
+            FileSys/FileSys.cpp)
 
 add_executable(kos main.cpp)
 
-target_link_libraries(kos PRIVATE Console)
+target_link_libraries(kos PRIVATE Console PRIVATE FileSys)

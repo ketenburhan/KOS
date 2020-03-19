@@ -1,13 +1,11 @@
 #include <iostream>
-#include "Console.h"
+#include "Console.hpp"
 
 namespace Console {
-	template <typename T>
-	void Write(T msg) {
+	void Write(std::string msg) {
 		std::cout << msg;
 	}
-	template <typename T>
-	void Log(T msg) {
+	void Log(std::string msg) {
 		std::cout << msg << std::endl;
 	}
 	std::string Get() {
@@ -19,6 +17,9 @@ namespace Console {
 		std::string value;
 		std::getline(std::cin, value);
 		return value;
+	}
+	void Nextline() {
+		std::cout << std::endl;
 	}
 	void Wait() {
 		std::cin.get();
