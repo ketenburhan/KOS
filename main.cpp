@@ -9,7 +9,9 @@
 #include "FileSys/FileSys.hpp"
 
 
-int run(std::string input) {
+
+
+char run(std::string input) {
 	//                 "\-([\w\-\_]+)(?:\=([\w\-\_]|\"(?:\\\"|[^\"])*\"|\\[^\\]*\\)+)?|[\w\-\_]+|\w+|\"(?:\\\"|[^\"])*\"|\\[^\\]*\\"  
 	std::regex e (R"reg(\-([\w\-\_]+)(?:\=([\w\-\_]|\"(?:\\\"|[^\"])*\"|\\[^\\]*\\)+)?|[\w\-\_]+|\w+|\"(?:\\\"|[^\"])*\"|\\[^\\]*\\)reg");
 
@@ -18,11 +20,13 @@ int run(std::string input) {
 
 	std::regex_token_iterator<std::string::iterator> a ( input.begin(), input.end(), e );
 	while (a!=rend) std::cout << " [" << *a++ << "]";
-	Console::Nextline();
-	return 0;
+	Console::nl();
+	return OK;
 };
 
 int main() {
+
+	Folder DISK = Folder(std::string("root"));
 	std::string _USERNAME ("buran"),
 				_DEVICE ("PC"),
 				input;
@@ -30,6 +34,9 @@ int main() {
 	std::vector<std::string> path = {"home", "Documents", "projects"};
 	bool _RUNNING (true);
 
+	std::cout <<  DISK.createFolder(std::string("Apps")) << std::endl;
+	std::vector<std::string> cd {"Apps"};
+	std::cout <<  DISK.getFolderByPath(DISK, cd).name << std::endl;
 	while (_RUNNING) {
 		Console::Write(_USERNAME + '@' + _DEVICE + ':');
 		for (std::string pathnow : path) {
@@ -40,11 +47,11 @@ int main() {
 
 		run(input);
 	}
-	Console::Wait();
 };
 
 
 class Command {
+
 	Command() {
 		
 	}
