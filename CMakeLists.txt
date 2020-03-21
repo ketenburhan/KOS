@@ -6,6 +6,10 @@ project(kos
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+enable_testing()
+add_executable(testfilesystem FileSys/testFileSystem.cpp)
+add_test(Test testfilesystem)
+
 
 add_library(Console
             Console/Console.hpp)

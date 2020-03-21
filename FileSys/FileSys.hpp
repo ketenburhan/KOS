@@ -9,6 +9,10 @@ class File {
 	std::string name,
 				type,
 				content;
+	template <typename T1, typename T2> File(T1 n, T2 t) {
+		name = n;
+		type = t;
+	}
 	template <typename T1, typename T2, typename T3> File(T1 n, T2 t, T3 c) {
 		name = n;
 		type = t;
@@ -31,6 +35,9 @@ class Directory {
 		files.push_back(n);
 		return OK;
 	}
+	Directory* getDirectory(std::string name) {
+		return NULL;
+	}
 	static Directory* getDirectoryByPath(Directory* from, std::vector<std::string> path) {
 		for (std::string pn : path) {
 			for (Directory* fold : from->directories) {
@@ -42,7 +49,7 @@ class Directory {
 		}
 		return from;
 	}
-	static File* getFileByPath(Directory* from, std::vector<std::string> path) {
+	static File* getFileByPath(Directory* from, std::vector<std::string>& path) {
 		for (unsigned i = 0; i<path.size()-1; i++) {
 			std::string pn = path[i];
 			for (Directory* fold : from->directories) {
@@ -61,7 +68,6 @@ class Directory {
 		return mustReturn;
 	}
 };
-
 
 std::vector<Directory*> _DISKS;
 
@@ -89,12 +95,22 @@ Directory* getDiskByName(std::string name) {
 }
 
 
-Directory* createDirectory(std::string name) {
-	return new Directory(name);
+char createToPath(std::string name, Directory* dir) {
+	dir->create(new Directory(name));
+	return OK;
 }
-File* createFile(std::string name, std::string type, std::string content) {
-	return new File(name, type, content);
+char createToPath(std::string name, std::string type, Directory* dir) {
+	dir->create(new File(name, type));
+	return OK;
 }
-
-
+char createToPath(std::string name, Directory*& disk, std::vector<std::string> path) {
+	Directory* dir = Directory::getDirectoryByPath(disk, path);
+	dir->create(new Directory(name));
+	return OK;
+}
+char createToPath(std::string name, std::string type, Directory*& disk, std::vector<std::string> path) {
+	Directory* dir = Directory::getDirectoryByPath(disk, path);
+	dir->create(new File(name, type));
+	return OK;
+}
 #endif

@@ -27,12 +27,16 @@ char run(std::string input) {
 int main() {
 	Directory* DISK = new Directory("root");
 	createDisk(DISK);
-	Directory* MNT = new Directory("mnt");
-	createDisk(MNT);
 	DISK->create(new Directory("Apps"));
 	DISK->create(new Directory("Documents"));
 	DISK->create(new Directory(".cmd"));
+	std::vector<std::string> dir = {"Apps"};
+	createToPath("terminal.app","app",DISK,dir);
 	DISK->create(new Directory("Desktop"));
+	Directory* MNT = new Directory("mnt");
+	createDisk(MNT);
+	MNT->create(new Directory("mount"));
+	MNT->create(new Directory("boot"));
 	std::string _USERNAME ("buran"),
 				_DEVICE ("PC"),
 				input;
@@ -41,9 +45,11 @@ int main() {
 	bool _RUNNING (true);
 
 	std::vector<std::string> cd {"Apps"};
+	std::vector<std::string> cd2 {"Apps","terminal.app"};
 	std::cout <<  DISK << std::endl;
 	std::cout <<  getDiskByName("root") << std::endl;
-	std::cout <<  Directory::getDirectoryByPath(DISK, cd) << std::endl;
+	std::cout <<  Directory::getDirectoryByPath(DISK, cd)->name << std::endl;
+	std::cout <<  Directory::getFileByPath(DISK, cd2)->name << std::endl;
 	while (_RUNNING) {
 		Console::Write(_USERNAME + '@' + _DEVICE + ':');
 		for (std::string pathnow : path) {
