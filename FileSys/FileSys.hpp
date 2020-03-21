@@ -9,35 +9,32 @@ class File {
 	std::string name,
 				type,
 				content;
-
-	File() {}
-	File(std::string n, std::string t, std::string c) {
+	template <typename T1, typename T2, typename T3> File(T1 n, T2 t, T3 c) {
 		name = n;
 		type = t;
 		content = c;
 	}
 };
-class Folder {
+class Directory {
 	public:
 	std::string name;
-	std::vector<Folder> folders;
-	std::vector<File> files;
-
-	Folder(std::string n) {
+	std::vector<Directory*> directories;
+	std::vector<File*> files;
+	template <typename T> Directory(T n) {
 		name = n;
 	}
-	char create(Folder n) {
-		folders.push_back(n);
+	char create(Directory* n) {
+		directories.push_back(n);
 		return OK;
 	}
-	char create(File n) {
+	char create(File* n) {
 		files.push_back(n);
 		return OK;
 	}
-	Folder getFolderByPath(Folder from,std::vector<std::string> path) {
+	static Directory* getDirectoryByPath(Directory* from, std::vector<std::string> path) {
 		for (std::string pn : path) {
-			for (Folder fold : from.folders) {
-				if (fold.name == pn) {
+			for (Directory* fold : from->directories) {
+				if (fold->name == pn) {
 					from = fold;
 					break;
 				}
@@ -45,19 +42,19 @@ class Folder {
 		}
 		return from;
 	}
-	File getFileByPath(Folder from,std::vector<std::string> path) {
-		for (int i = 0; i<path.size()-1; i++) {
+	static File* getFileByPath(Directory* from, std::vector<std::string> path) {
+		for (unsigned i = 0; i<path.size()-1; i++) {
 			std::string pn = path[i];
-			for (Folder fold : from.folders) {
-				if (fold.name == pn) {
+			for (Directory* fold : from->directories) {
+				if (fold->name == pn) {
 					from = fold;
 					break;
 				}
 			}
 		}
-		File mustReturn;
-		for (File x : from.files) {
-			if (x.name == path[path.size()-1]) {
+		File* mustReturn;
+		for (File* x : from->files) {
+			if (x->name == path[path.size()-1]) {
 				mustReturn = x;
 			}
 		}
@@ -65,14 +62,39 @@ class Folder {
 	}
 };
 
-Folder* createFolder(std::string name) {
-	if (name.find('.')!=std::string::npos) {
-		return new Folder(name);
+
+std::vector<Directory*> _DISKS;
+
+char createDisk(Directory* newDisk) {
+	_DISKS.push_back(newDisk);
+	return OK;
+}
+char removeDisk(Directory* newDisk) {
+	for (unsigned i = 0; i<_DISKS.size(); i++) {
+		if (newDisk == _DISKS[i]) {
+			_DISKS.erase(_DISKS.begin()+i);
+			return OK;
+		}
+	}
+	return FAIL;
+}
+
+Directory* getDiskByName(std::string name) {
+	for (Directory* disk : _DISKS) {
+		if (disk->name == name) {
+			return disk;
+		}
 	}
 	return NULL;
+}
+
+
+Directory* createDirectory(std::string name) {
+	return new Directory(name);
 }
 File* createFile(std::string name, std::string type, std::string content) {
 	return new File(name, type, content);
 }
+
 
 #endif

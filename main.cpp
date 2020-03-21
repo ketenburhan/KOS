@@ -25,8 +25,14 @@ char run(std::string input) {
 };
 
 int main() {
-
-	Folder DISK = Folder(std::string("root"));
+	Directory* DISK = new Directory("root");
+	createDisk(DISK);
+	Directory* MNT = new Directory("mnt");
+	createDisk(MNT);
+	DISK->create(new Directory("Apps"));
+	DISK->create(new Directory("Documents"));
+	DISK->create(new Directory(".cmd"));
+	DISK->create(new Directory("Desktop"));
 	std::string _USERNAME ("buran"),
 				_DEVICE ("PC"),
 				input;
@@ -34,9 +40,10 @@ int main() {
 	std::vector<std::string> path = {"home", "Documents", "projects"};
 	bool _RUNNING (true);
 
-	std::cout <<  DISK.createFolder(std::string("Apps")) << std::endl;
 	std::vector<std::string> cd {"Apps"};
-	std::cout <<  DISK.getFolderByPath(DISK, cd).name << std::endl;
+	std::cout <<  DISK << std::endl;
+	std::cout <<  getDiskByName("root") << std::endl;
+	std::cout <<  Directory::getDirectoryByPath(DISK, cd) << std::endl;
 	while (_RUNNING) {
 		Console::Write(_USERNAME + '@' + _DEVICE + ':');
 		for (std::string pathnow : path) {
