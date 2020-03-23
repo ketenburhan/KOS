@@ -46,6 +46,9 @@ int main() {
 
 	std::vector<std::string> cd {"Apps"};
 	std::vector<std::string> cd2 {"Apps","terminal.app"};
+	Console::Log("---------------");
+	Console::Log("Wellcome to KOS");
+	Console::Log("---------------");
 	std::cout <<  DISK << std::endl;
 	std::cout <<  getDiskByName("root") << std::endl;
 	std::cout <<  Directory::getDirectoryByPath(DISK, cd)->name << std::endl;
@@ -59,13 +62,5 @@ int main() {
 		input = Console::Getline();
 
 		run(input);
-	}
-};
-
-
-class Command {
-
-	Command() {
-		
 	}
 };

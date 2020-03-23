@@ -36,6 +36,11 @@ class Directory {
 		return OK;
 	}
 	Directory* getDirectory(std::string name) {
+		for (Directory* dir : directories) {
+			if (dir->name == name) {
+				return dir;
+			}
+		}
 		return NULL;
 	}
 	static Directory* getDirectoryByPath(Directory* from, std::vector<std::string> path) {
