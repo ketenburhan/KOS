@@ -27,6 +27,8 @@ class Directory {
 	template <typename T> Directory(T n) {
 		name = n;
 	}
+
+	// CREATE
 	char create(Directory* n) {
 		directories.push_back(n);
 		return OK;
@@ -34,6 +36,51 @@ class Directory {
 	char create(File* n) {
 		files.push_back(n);
 		return OK;
+	}
+
+	// REMOVE
+	char remove(Directory* dir) {
+		for (unsigned i = 0; i<directories.size(); i++) {
+			if (dir == directories[i]) {
+				directories.erase(directories.begin()+i);
+				return OK;
+			}
+		}
+		return FAIL;
+	}
+	char remove(File* file) {
+		for (unsigned i = 0; i<files.size(); i++) {
+			if (file == files[i]) {
+				files.erase(files.begin()+i);
+				return OK;
+			}
+		}
+		return FAIL;
+	}
+	char remove (std::string name) {
+		for (unsigned i = 0; i<directories.size(); i++) {
+			if (name == directories[i]->name) {
+				directories.erase(directories.begin()+i);
+				return OK;
+			}
+		}
+		for (unsigned i = 0; i<files.size(); i++) {
+			if (name == files[i]->name) {
+				files.erase(files.begin()+i);
+				return OK;
+			}
+		}
+		return FAIL;
+	}
+
+	// GETTING
+	File* getFile(std::string name) { // terminal.app | application
+		for (File* file : files) {
+			if (file->name == name) {
+				return file;
+			}
+		}
+		return NULL;
 	}
 	Directory* getDirectory(std::string name) {
 		for (Directory* dir : directories) {
@@ -43,6 +90,8 @@ class Directory {
 		}
 		return NULL;
 	}
+
+	// PATH
 	static Directory* getDirectoryByPath(Directory* from, std::vector<std::string> path) {
 		for (std::string pn : path) {
 			for (Directory* fold : from->directories) {
@@ -72,6 +121,25 @@ class Directory {
 		}
 		return mustReturn;
 	}
+	// CREATE STATIC
+	static char createToPath(std::string name, Directory* dir) {
+		dir->create(new Directory(name));
+		return OK;
+	}
+	static char createToPath(std::string name, std::string type, Directory* dir) {
+		dir->create(new File(name, type));
+		return OK;
+	}
+	static char createToPath(std::string name, Directory*& disk, std::vector<std::string> path) {
+		Directory* dir = Directory::getDirectoryByPath(disk, path);
+		dir->create(new Directory(name));
+		return OK;
+	}
+	static char createToPath(std::string name, std::string type, Directory*& disk, std::vector<std::string> path) {
+		Directory* dir = Directory::getDirectoryByPath(disk, path);
+		dir->create(new File(name, type));
+		return OK;
+	}
 };
 
 std::vector<Directory*> _DISKS;
@@ -100,22 +168,4 @@ Directory* getDiskByName(std::string name) {
 }
 
 
-char createToPath(std::string name, Directory* dir) {
-	dir->create(new Directory(name));
-	return OK;
-}
-char createToPath(std::string name, std::string type, Directory* dir) {
-	dir->create(new File(name, type));
-	return OK;
-}
-char createToPath(std::string name, Directory*& disk, std::vector<std::string> path) {
-	Directory* dir = Directory::getDirectoryByPath(disk, path);
-	dir->create(new Directory(name));
-	return OK;
-}
-char createToPath(std::string name, std::string type, Directory*& disk, std::vector<std::string> path) {
-	Directory* dir = Directory::getDirectoryByPath(disk, path);
-	dir->create(new File(name, type));
-	return OK;
-}
 #endif
