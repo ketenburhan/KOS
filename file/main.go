@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"unsafe"
 )
 
 type path []string
 
 type _file struct {
-	name     string
-	startptr uint32
-	size     uint32
-	parent   *_directory
+	name       string
+	startptr   uint32
+	size       uint32
+	contextptr *string
+	parent     *_directory
 }
 
 type _directory struct {
@@ -31,11 +31,129 @@ var fileName string
 func main() {
 	fileName = "demo.file"
 
-	readDictioary()
+	// readDictioary()
+	dict.files = make([]*_file, 3)
+	dict.files[0] = &_file{name: "index.html", parent: &dict}
+	dict.files[1] = &_file{name: "style.css", parent: &dict}
+	dict.files[2] = &_file{name: "script.js", parent: &dict}
 
-	fmt.Fprintln(os.Stdout, string(dictionaryToBytes(dict)))
-	fmt.Fprintln(os.Stdout, unsafe.Sizeof(dict))
+	dict.files[0].setContext(`<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	
+</body>
+</html>`)
+	dict.files[1].setContext("html, body { margin: 0px }")
+	dict.files[2].setContext("alert('Hello World')")
+
+	saveToDisk()
+	// fmt.Fprintln(os.Stdout, getDirectory(path{"home", "document", "kos"}))
+	// fmt.Fprintln(os.Stdout, getFile(path{"home", "documents", "three"}))
+
+	// fmt.Fprintln(os.Stdout, string(dictionaryToBytes()))
+	// fmt.Fprintln(os.Stdout, unsafe.Sizeof(dict))
 }
+
+func createFileToPath(p path) *_file {
+	l := len(p)
+	filename := p[l-1]
+	p = p[:l-1]
+	parent := getDirectory(p)
+	return createFile(filename, parent)
+}
+func createFile(filename string, parent *_directory) *_file {
+	file := &_file{name: filename}
+	file.parent = parent
+	parent.files = append(parent.files, file)
+	return file
+}
+func createDirectoryToPath(p path) *_directory {
+	l := len(p)
+	dirname := p[l-1]
+	p = p[:l-1]
+	parent := getDirectory(p)
+	return createDirectory(dirname, parent)
+}
+func createDirectory(dirname string, parent *_directory) *_directory {
+	dir := &_directory{name: dirname}
+	dir.parent = parent
+	parent.directories = append(parent.directories, dir)
+	return dir
+}
+
+func setContextByPath(p path, str string) bool {
+	return getFile(p[:]).setContext(str)
+}
+func (file *_file) setContext(str string) bool {
+	if file != nil {
+		s := new(string)
+		*s = str
+		file.contextptr = s
+		file.size = uint32(len(str))
+		return true
+	}
+	return false
+}
+
+func getContextByPath(p path) string {
+	return getFile(p[:]).getContext()
+}
+func (file *_file) getContext() string {
+	if file != nil {
+		if file.contextptr == nil {
+			return string(read(file.startptr+contextPtr, file.size))
+		}
+		return *file.contextptr
+	}
+	return ""
+}
+
+func read(ptr, size uint32) []byte {
+
+	file, err := os.Open(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	buf := make([]byte, size)
+	file.ReadAt(buf, int64(ptr)) // index, err
+	file.Close()
+	return buf
+}
+
+func getDirectory(p path) *_directory {
+	var ptr *_directory = &dict
+	for _, name := range p {
+		oldptr := ptr
+		for _, x := range ptr.directories {
+			if x.name == name {
+				ptr = x
+				break
+			}
+		}
+		if oldptr == ptr {
+			return nil
+		}
+	}
+	return ptr
+}
+func getFile(p path) *_file {
+	l := len(p)
+	filename := p[l-1]
+	p = p[:l-1]
+	ptr := getDirectory(p)
+	for _, x := range ptr.files {
+		if x.name == filename {
+			return x
+		}
+	}
+	return nil
+}
+
 func readDictioary() {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -44,7 +162,7 @@ func readDictioary() {
 	buf := make([]byte, 4)
 	file.Read(buf) // index, err
 	contextPtr = bytesToUint32(buf)
-	fmt.Fprintln(os.Stdout, buf)
+	// fmt.Fprintln(os.Stdout, buf)
 
 	l := contextPtr - 4
 
@@ -87,12 +205,12 @@ func readDictioary() {
 		i++
 	}
 }
-func dictionaryToBytes(d _directory) []byte {
-	var value []byte = []byte(d.name)
-	for _, cdir := range d.directories {
+func dictionaryToBytes() []byte {
+	var value []byte = []byte(dict.name)
+	for _, cdir := range dict.directories {
 		value = append(value, cdir.toBytes()...)
 	}
-	for _, cfile := range d.files {
+	for _, cfile := range dict.files {
 		value = append(value, cfile.toBytes()...)
 	}
 	value = append(uint32ToBytes(uint32(len(value)+4)), value...)
@@ -111,11 +229,12 @@ func (d *_directory) toBytes() []byte {
 	value = append(value, 29)
 	return value
 }
-func (f *_file) toBytes() []byte {
-	var value []byte = []byte(f.name)
+func (file *_file) toBytes() []byte {
+	var value []byte = []byte(file.name)
 	value = append(value, 30)
-	value = append(value, uint32ToBytes(f.startptr)...)
-	value = append(value, uint32ToBytes(f.size)...)
+	value = append(value, uint32ToBytes(file.startptr)...)
+	fmt.Fprintln(os.Stdout, uint32ToBytes(file.startptr))
+	value = append(value, uint32ToBytes(file.size)...)
 	return value
 }
 
@@ -126,4 +245,27 @@ func uint32ToBytes(num uint32) []byte {
 	a := make([]byte, 4)
 	binary.LittleEndian.PutUint32(a, num)
 	return a
+}
+
+func getFiles(dir *_directory) []*_file {
+	var files []*_file
+	files = append(files, dir.files...)
+	for _, x := range dir.directories {
+		files = append(files, getFiles(x)...)
+	}
+	return files
+}
+
+func saveToDisk() {
+	var context []byte
+	files := getFiles(&dict)
+	for _, file := range files {
+		fcontext := file.getContext()
+		file.startptr = uint32(len(context))
+		file.size = uint32(len(fcontext))
+		file.contextptr = nil
+		context = append(context, []byte(fcontext)...)
+	}
+	context = append(dictionaryToBytes(), context...)
+	fmt.Fprintln(os.Stdout, string(context))
 }
